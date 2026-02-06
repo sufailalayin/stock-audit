@@ -2,15 +2,16 @@ FROM php:8.2-fpm
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    git \
-    unzip \
+    nginx \
     libzip-dev \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
+    unzip \
     zip \
     curl \
-    && docker-php-ext-install zip pdo pdo_mysql mbstring exif pcntl bcmath gd
+    libonig-dev \
+    libxml2-dev \
+    && docker-php-ext-install pdo pdo_mysql mbstring zip exif \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -24,9 +25,15 @@ COPY . .
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Permissions
+# Laravel permissions
 RUN chown -R www-data:www-data /var/www \
-    && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+    && chmod -R 775 storage bootstrap/cache
 
-EXPOSE 9000
-CMD php artisan serve --host=0.0.0.0 --port=$PORT
+# Copy Nginx config
+COPY docker/nginx.conf /etc/nginx/nginx.conf
+
+# Expose Railway port
+EXPOSE 8080
+
+# Start services
+CMD service nginx start && php-fpm
