@@ -1,36 +1,43 @@
 FROM php:8.2-fpm
 
-# Install system deps
+# Install system dependencies + PHP extensions required by Laravel
 RUN apt-get update && apt-get install -y \
     nginx \
+    git \
+    curl \
     zip \
     unzip \
-    libzip-dev \
     libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    curl \
-    && docker-php-ext-install pdo pdo_mysql mbstring zip exif pcntl
+    libjpeg-dev \
+    libfreetype6-dev \
+    libzip-dev \
+    libicu-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install gd pdo pdo_mysql zip intl exif \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-# Set working dir
+# Set working directory
 WORKDIR /var/www
 
-# Copy app
+# Copy project files
 COPY . .
 
-# Install PHP deps
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
 # Permissions
 RUN chown -R www-data:www-data /var/www \
     && chmod -R 775 storage bootstrap/cache
 
-# Nginx config
+# Copy nginx config
 COPY docker/nginx.conf /etc/nginx/sites-available/default
 
+# Expose Railway port
 EXPOSE 8080
 
-CMD service php-fpm start && nginx -g 'daemon off;'
+# Start PHP-FPM and Nginx
+CMD ["sh", "-c", "php-fpm & nginx -g 'daemon off;'"]
