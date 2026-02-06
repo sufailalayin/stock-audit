@@ -28,10 +28,14 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
-
+# Clear Laravel caches
+RUN php artisan key:generate --force || true \
+    && php artisan config:clear || true \
+    && php artisan route:clear || true \
+    && php artisan view:clear || true
 # Permissions
 RUN chown -R www-data:www-data /var/www \
-    && chmod -R 775 storage bootstrap/cache
+    && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
 # Copy nginx config
 COPY docker/nginx.conf /etc/nginx/sites-available/default
