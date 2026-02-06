@@ -1,32 +1,36 @@
 FROM php:8.2-fpm
 
+# Install system deps
 RUN apt-get update && apt-get install -y \
     nginx \
-    unzip \
     zip \
-    curl \
-    libonig-dev \
-    libxml2-dev \
+    unzip \
     libzip-dev \
     libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo pdo_mysql mbstring zip exif gd \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    libonig-dev \
+    libxml2-dev \
+    curl \
+    && docker-php-ext-install pdo pdo_mysql mbstring zip exif pcntl
 
+# Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# Set working dir
 WORKDIR /var/www
+
+# Copy app
 COPY . .
 
+# Install PHP deps
 RUN composer install --no-dev --optimize-autoloader
 
+# Permissions
 RUN chown -R www-data:www-data /var/www \
     && chmod -R 775 storage bootstrap/cache
 
-COPY docker/nginx.conf /etc/nginx/nginx.conf
+# Nginx config
+COPY docker/nginx.conf /etc/nginx/sites-available/default
 
 EXPOSE 8080
+
 CMD service nginx start && php-fpm
