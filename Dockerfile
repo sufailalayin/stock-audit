@@ -33,4 +33,4 @@ COPY docker/nginx.conf /etc/nginx/sites-available/default
 
 EXPOSE 8080
 
-CMD service nginx start && php-fpm
+CMD service php-fpm start && nginx -g 'daemon off;'
