@@ -1,12 +1,10 @@
 [phases.setup]
-cmds = [
-  "install-php-extensions gd"
-]
+aptPkgs = ["php8.2-gd"]
 
-[phases.install]
+[phases.build]
 cmds = [
-  "composer install --no-dev --optimize-autoloader --ignore-platform-req=ext-gd"
+  "composer install --no-dev --optimize-autoloader"
 ]
 
 [start]
-cmd = "php -S 0.0.0.0:$PORT -t public"
+cmd = "php artisan serve --host=0.0.0.0 --port=$PORT"
