@@ -1,11 +1,6 @@
-[phases.setup]
-cmds = [
-  "install-php-extensions gd"
-]
-
 [phases.build]
 cmds = [
-  "composer install --no-dev --optimize-autoloader"
+  "composer install --no-dev --optimize-autoloader --ignore-platform-req=ext-gd"
 ]
 
 [start]
