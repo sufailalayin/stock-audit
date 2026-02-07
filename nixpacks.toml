@@ -1,5 +1,5 @@
 [phases.setup]
-aptPkgs = ["php8.2-gd"]
+aptPkgs = ["php82Extensions.gd"]
 
 [phases.build]
 cmds = [
