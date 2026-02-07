@@ -1,5 +1,7 @@
 [phases.setup]
-nixPkgs = ["php82", "php82Extensions.gd"]
+cmds = [
+  "install-php-extensions gd"
+]
 
 [phases.build]
 cmds = [
