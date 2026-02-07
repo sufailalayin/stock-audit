@@ -1,6 +1,11 @@
-[phases.extensions]
+[phases.setup]
 cmds = [
-  "install-php-extensions ctype curl dom fileinfo filter hash mbstring openssl pcre pdo session tokenizer xml gd"
+  "install-php-extensions gd"
+]
+
+[phases.build]
+cmds = [
+  "composer install --no-dev --optimize-autoloader --ignore-platform-req=ext-gd"
 ]
 
 [start]
